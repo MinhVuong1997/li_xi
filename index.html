@@ -2,26 +2,34 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>🧧 Lì Xì Tết May Mắn</title>
+<title>Lì Xì May Mắn</title>
 
 <style>
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(to bottom, #ff0000, #990000);
-    text-align: center;
     color: white;
+    text-align: center;
     margin: 0;
     padding: 20px;
 }
 
-h1 {
-    font-size: 38px;
+h1 { font-size: 36px; }
+
+button {
+    margin: 5px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: gold;
+    font-weight: bold;
 }
 
 #packetList {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 20px;
+    gap: 25px;
     margin-top: 30px;
 }
 
@@ -31,11 +39,11 @@ h1 {
 }
 
 .packet:hover {
-    transform: scale(1.1);
+    transform: scale(1.15);
 }
 
 .packet img {
-    width: 100px;
+    width: 110px;
 }
 
 .money {
@@ -47,43 +55,76 @@ h1 {
 .opened img {
     opacity: 0.3;
 }
-
-button {
-    margin-top: 25px;
-    padding: 10px 20px;
-    font-size: 18px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background: gold;
-}
 </style>
 </head>
 
 <body>
 
-<h1>🧧 Chọn Lì Xì May Mắn 🧧</h1>
+<h1>🧧 Lì Xì May Mắn 🧧</h1>
 
-<div id="packetList"></div>
+<button onclick="showSetting()">⚙️ Setting</button>
 
-<button onclick="resetGame()">🔄 Chơi Lại</button>
+<div id="gamePanel">
+    <div id="packetList"></div>
+</div>
+
+<div id="settingPanel" style="display:none;">
+    <h3>Cấu Hình Lì Xì</h3>
+    <div id="configList"></div>
+    <button onclick="addConfig()">➕ Thêm</button>
+    <button onclick="saveSetting()">💾 Lưu</button>
+    <button onclick="hideSetting()">⬅ Quay Lại</button>
+</div>
 
 <script>
 let packets = [];
-const envelopeImg = "https://cdn-icons-png.flaticon.com/512/2583/2583344.png";
+const envelopeImg = "lixi.png"; // 👈 dùng icon bạn cung cấp
 
-function initGame() {
+/* ===== Setting ===== */
+
+function showSetting() {
+    document.getElementById("settingPanel").style.display = "block";
+    document.getElementById("gamePanel").style.display = "none";
+}
+
+function hideSetting() {
+    document.getElementById("settingPanel").style.display = "none";
+    document.getElementById("gamePanel").style.display = "block";
+}
+
+function addConfig(value = "", quantity = "") {
+    const div = document.createElement("div");
+    div.style.margin = "10px 0";
+    div.innerHTML = `
+        Mệnh giá: <input type="number" class="value" value="${value}">
+        Số lượng: <input type="number" class="quantity" value="${quantity}">
+        <button onclick="this.parentElement.remove()">❌</button>
+    `;
+    document.getElementById("configList").appendChild(div);
+}
+
+function saveSetting() {
     packets = [];
+    const values = document.querySelectorAll(".value");
+    const quantities = document.querySelectorAll(".quantity");
 
-    for (let i = 0; i < 20; i++) packets.push(100000);
-    for (let i = 0; i < 10; i++) packets.push(200000);
-    for (let i = 0; i < 3; i++) packets.push(300000);
-    for (let i = 0; i < 2; i++) packets.push(500000);
+    for (let i = 0; i < values.length; i++) {
+        let value = parseInt(values[i].value);
+        let quantity = parseInt(quantities[i].value);
+
+        if (!isNaN(value) && !isNaN(quantity)) {
+            for (let j = 0; j < quantity; j++) {
+                packets.push(value);
+            }
+        }
+    }
 
     packets.sort(() => Math.random() - 0.5);
-
     renderPackets();
+    hideSetting();
 }
+
+/* ===== Game ===== */
 
 function renderPackets() {
     const container = document.getElementById("packetList");
@@ -116,11 +157,12 @@ function openPacket(index) {
         packets[index].toLocaleString() + " VNĐ 🎉";
 }
 
-function resetGame() {
-    initGame();
-}
-
-initGame();
+/* Default */
+addConfig(100000, 20);
+addConfig(200000, 10);
+addConfig(300000, 3);
+addConfig(500000, 2);
+saveSetting();
 </script>
 
 </body>
