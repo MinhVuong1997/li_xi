@@ -2,129 +2,155 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Lì Xì May Mắn</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Game Lì Xì Event</title>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to bottom, #ff0000, #990000);
-    color: white;
-    text-align: center;
-    margin: 0;
-    padding: 20px;
+* {
+    box-sizing: border-box;
 }
 
-h1 { font-size: 36px; }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: radial-gradient(circle at center, #ff3c3c, #8b0000);
+    color: white;
+    min-height: 100vh;
+}
 
+/* ===== HEADER ===== */
+h1 {
+    font-size: clamp(22px, 4vw, 42px);
+    margin: 20px 10px;
+    text-shadow: 0 0 20px gold;
+}
+
+/* ===== BUTTON ===== */
 button {
-    margin: 5px;
-    padding: 8px 15px;
+    padding: 10px 18px;
     border: none;
-    border-radius: 6px;
-    cursor: pointer;
+    border-radius: 8px;
     background: gold;
     font-weight: bold;
+    cursor: pointer;
+    font-size: clamp(14px, 2vw, 18px);
 }
 
+/* ===== GRID RESPONSIVE ===== */
 #packetList {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 25px;
-    margin-top: 30px;
+    gap: 20px;
+    padding: 20px;
+    justify-items: center;
 }
 
+/* Mobile */
+@media (max-width: 600px) {
+    #packetList {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Tablet */
+@media (min-width: 601px) and (max-width: 1024px) {
+    #packetList {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* PC */
+@media (min-width: 1025px) {
+    #packetList {
+        grid-template-columns: repeat(8, 1fr);
+    }
+}
+
+/* ===== PACKET ===== */
 .packet {
+    font-size: clamp(40px, 6vw, 80px);
     cursor: pointer;
-    transition: transform 0.3s;
+    transition: transform 0.2s;
 }
 
 .packet:hover {
-    transform: scale(1.15);
+    transform: scale(1.2);
 }
 
-.packet img {
-    width: 110px;
+.shake {
+    animation: shake 0.5s;
 }
 
-.money {
-    margin-top: 8px;
+@keyframes shake {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    50% { transform: rotate(-10deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.opened {
+    opacity: 0.5;
+}
+
+/* ===== POPUP ===== */
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: gold;
+    color: red;
+    padding: 30px 40px;
+    border-radius: 20px;
+    font-size: clamp(18px, 3vw, 32px);
     font-weight: bold;
-    font-size: 16px;
+    box-shadow: 0 0 40px white;
+    transition: 0.4s;
+    z-index: 1000;
+    max-width: 90%;
 }
 
-.opened img {
-    opacity: 0.3;
+.popup.show {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* ===== CONFETTI ===== */
+.confetti {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    top: -10px;
+    animation: fall 3s linear forwards;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh) rotate(720deg);
+    }
 }
 </style>
 </head>
 
 <body>
 
-<h1>🧧 Lì Xì May Mắn 🧧</h1>
+<h1>🎉 MINI GAME LÌ XÌ MAY MẮN 🎉</h1>
+<button onclick="resetGame()">🔄 Chơi Lại</button>
 
-<button onclick="showSetting()">⚙️ Setting</button>
-
-<div id="gamePanel">
-    <div id="packetList"></div>
-</div>
-
-<div id="settingPanel" style="display:none;">
-    <h3>Cấu Hình Lì Xì</h3>
-    <div id="configList"></div>
-    <button onclick="addConfig()">➕ Thêm</button>
-    <button onclick="saveSetting()">💾 Lưu</button>
-    <button onclick="hideSetting()">⬅ Quay Lại</button>
-</div>
+<div id="packetList"></div>
+<div id="popup" class="popup"></div>
 
 <script>
 let packets = [];
-const envelopeImg = "lixi.png"; // 👈 dùng icon bạn cung cấp
 
-/* ===== Setting ===== */
-
-function showSetting() {
-    document.getElementById("settingPanel").style.display = "block";
-    document.getElementById("gamePanel").style.display = "none";
-}
-
-function hideSetting() {
-    document.getElementById("settingPanel").style.display = "none";
-    document.getElementById("gamePanel").style.display = "block";
-}
-
-function addConfig(value = "", quantity = "") {
-    const div = document.createElement("div");
-    div.style.margin = "10px 0";
-    div.innerHTML = `
-        Mệnh giá: <input type="number" class="value" value="${value}">
-        Số lượng: <input type="number" class="quantity" value="${quantity}">
-        <button onclick="this.parentElement.remove()">❌</button>
-    `;
-    document.getElementById("configList").appendChild(div);
-}
-
-function saveSetting() {
+function initPackets() {
     packets = [];
-    const values = document.querySelectorAll(".value");
-    const quantities = document.querySelectorAll(".quantity");
-
-    for (let i = 0; i < values.length; i++) {
-        let value = parseInt(values[i].value);
-        let quantity = parseInt(quantities[i].value);
-
-        if (!isNaN(value) && !isNaN(quantity)) {
-            for (let j = 0; j < quantity; j++) {
-                packets.push(value);
-            }
-        }
-    }
-
+    for (let i = 0; i < 20; i++) packets.push(100000);
+    for (let i = 0; i < 10; i++) packets.push(200000);
+    for (let i = 0; i < 3; i++) packets.push(300000);
+    for (let i = 0; i < 2; i++) packets.push(500000);
     packets.sort(() => Math.random() - 0.5);
-    renderPackets();
-    hideSetting();
 }
-
-/* ===== Game ===== */
 
 function renderPackets() {
     const container = document.getElementById("packetList");
@@ -133,36 +159,63 @@ function renderPackets() {
     packets.forEach((money, index) => {
         const div = document.createElement("div");
         div.className = "packet";
-        div.innerHTML = `
-            <img src="${envelopeImg}">
-            <div class="money"></div>
-        `;
+        div.innerHTML = "🧧";
 
         div.onclick = function() {
-            openPacket(index);
+            openPacket(index, div);
         };
 
         container.appendChild(div);
     });
 }
 
-function openPacket(index) {
-    const container = document.getElementById("packetList");
-    const packetDiv = container.children[index];
+function openPacket(index, element) {
+    if (element.classList.contains("opened")) return;
 
-    if (packetDiv.classList.contains("opened")) return;
+    element.classList.add("shake");
 
-    packetDiv.classList.add("opened");
-    packetDiv.querySelector(".money").innerHTML =
-        packets[index].toLocaleString() + " VNĐ 🎉";
+    setTimeout(() => {
+        element.classList.remove("shake");
+        element.classList.add("opened");
+        element.innerHTML = "💰";
+
+        showPopup(packets[index]);
+
+        if (packets[index] >= 300000) {
+            launchConfetti();
+        }
+
+    }, 500);
 }
 
-/* Default */
-addConfig(100000, 20);
-addConfig(200000, 10);
-addConfig(300000, 3);
-addConfig(500000, 2);
-saveSetting();
+function showPopup(amount) {
+    const popup = document.getElementById("popup");
+    popup.innerHTML = "🎉 Bạn trúng " + amount.toLocaleString() + " VNĐ 🎉";
+    popup.classList.add("show");
+
+    setTimeout(() => {
+        popup.classList.remove("show");
+    }, 2500);
+}
+
+function launchConfetti() {
+    for (let i = 0; i < 60; i++) {
+        let conf = document.createElement("div");
+        conf.className = "confetti";
+        conf.style.left = Math.random() * 100 + "vw";
+        conf.style.background = ["yellow","white","orange","gold"][Math.floor(Math.random()*4)];
+        conf.style.animationDuration = (2 + Math.random() * 2) + "s";
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 4000);
+    }
+}
+
+function resetGame() {
+    initPackets();
+    renderPackets();
+}
+
+resetGame();
 </script>
 
 </body>
