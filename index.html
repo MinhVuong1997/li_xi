@@ -1,222 +1,815 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Game Lì Xì Event</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Game Lì Xì Tết</title>
 
-<style>
-* {
-    box-sizing: border-box;
-}
+  <style>
+    :root{
+      --bg1:#7a0000;
+      --bg2:#ff2a2a;
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background: radial-gradient(circle at center, #ff3c3c, #8b0000);
-    color: white;
-    min-height: 100vh;
-}
+      --panel: rgba(255,255,255,.10);
+      --stroke: rgba(255,255,255,.16);
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
 
-/* ===== HEADER ===== */
-h1 {
-    font-size: clamp(22px, 4vw, 42px);
-    margin: 20px 10px;
-    text-shadow: 0 0 20px gold;
-}
+      --gold1:#ffe08a;
+      --gold2:#ffb400;
 
-/* ===== BUTTON ===== */
-button {
-    padding: 10px 18px;
-    border: none;
-    border-radius: 8px;
-    background: gold;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: clamp(14px, 2vw, 18px);
-}
-
-/* ===== GRID RESPONSIVE ===== */
-#packetList {
-    display: grid;
-    gap: 20px;
-    padding: 20px;
-    justify-items: center;
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-    #packetList {
-        grid-template-columns: repeat(3, 1fr);
+      --radius: 18px;
+      --radius-sm: 14px;
     }
-}
 
-/* Tablet */
-@media (min-width: 601px) and (max-width: 1024px) {
-    #packetList {
-        grid-template-columns: repeat(5, 1fr);
+    *{ box-sizing:border-box; }
+    html, body{ height: 100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(900px 520px at 18% 10%, rgba(255,255,255,.18), transparent 55%),
+        radial-gradient(900px 520px at 82% 0%, rgba(255,224,138,.18), transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      display:flex;
+      justify-content:center;
     }
-}
-
-/* PC */
-@media (min-width: 1025px) {
-    #packetList {
-        grid-template-columns: repeat(8, 1fr);
+    body::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
+      background-size: 18px 18px;
+      opacity:.35;
+      mix-blend-mode: soft-light;
     }
-}
 
-/* ===== PACKET ===== */
-.packet {
-    font-size: clamp(40px, 6vw, 80px);
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.packet:hover {
-    transform: scale(1.2);
-}
-
-.shake {
-    animation: shake 0.5s;
-}
-
-@keyframes shake {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(10deg); }
-    50% { transform: rotate(-10deg); }
-    75% { transform: rotate(5deg); }
-    100% { transform: rotate(0deg); }
-}
-
-.opened {
-    opacity: 0.5;
-}
-
-/* ===== POPUP ===== */
-.popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    background: gold;
-    color: red;
-    padding: 30px 40px;
-    border-radius: 20px;
-    font-size: clamp(18px, 3vw, 32px);
-    font-weight: bold;
-    box-shadow: 0 0 40px white;
-    transition: 0.4s;
-    z-index: 1000;
-    max-width: 90%;
-}
-
-.popup.show {
-    transform: translate(-50%, -50%) scale(1);
-}
-
-/* ===== CONFETTI ===== */
-.confetti {
-    position: fixed;
-    width: 8px;
-    height: 8px;
-    top: -10px;
-    animation: fall 3s linear forwards;
-}
-
-@keyframes fall {
-    to {
-        transform: translateY(110vh) rotate(720deg);
+    .app{
+      width: min(980px, 100%);
+      padding: 22px 16px 28px;
     }
-}
-</style>
+
+    .panel{
+      background: linear-gradient(180deg, var(--panel), rgba(255,255,255,.06));
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .topbar{
+      display:flex;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+
+    .titlewrap h1{
+      margin:0;
+      font-size: clamp(20px, 3.2vw, 32px);
+      letter-spacing: .2px;
+      line-height: 1.15;
+    }
+    .titlewrap p{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .actions{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.10);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 900;
+      letter-spacing: .2px;
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:hover{ transform: translateY(-1px); background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.22); }
+    button:active{ transform: translateY(0) scale(.99); }
+    button:focus-visible{ outline: 3px solid rgba(255,224,138,.55); outline-offset: 2px; }
+    button:disabled{ cursor:not-allowed; opacity:.75; transform:none; }
+
+    .btn-gold{
+      border: none;
+      color: #4a2400;
+      background: linear-gradient(135deg, var(--gold1), var(--gold2));
+      box-shadow: 0 10px 26px rgba(255,180,0,.25);
+    }
+    .btn-ghost{
+      background: rgba(0,0,0,.14);
+      border-color: rgba(255,255,255,.14);
+    }
+
+    .content{ padding: 16px 18px 18px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 12px;
+    }
+
+    .envelope{
+      width:100%;
+      border: 1px solid rgba(255,255,255,.18);
+      background: linear-gradient(180deg, rgba(0,0,0,.16), rgba(255,255,255,.06));
+      border-radius: 18px;
+      padding: 14px 12px;
+      box-shadow: 0 14px 34px rgba(0,0,0,.22);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height: 112px;
+      position: relative;
+      overflow:hidden;
+      transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, filter .14s ease;
+    }
+    .envelope:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,224,138,.38);
+      box-shadow: 0 18px 44px rgba(0,0,0,.28);
+      filter: saturate(1.05);
+    }
+
+    .envelope::after{
+      content:"";
+      position:absolute;
+      inset:-40% -60%;
+      background: linear-gradient(120deg, transparent 30%, rgba(255,224,138,.14), transparent 70%);
+      transform: rotate(12deg);
+      opacity: 0;
+      transition: opacity .14s ease;
+    }
+    .envelope:hover::after{ opacity: 1; }
+
+    .icon{
+      font-size: clamp(48px, 6.2vw, 64px);
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.32));
+    }
+
+    /* Opening */
+    .envelope.opening{
+      transform: translateY(-1px) scale(1.01);
+      border-color: rgba(255,224,138,.62);
+      animation: shake .34s ease-in-out;
+    }
+    @keyframes shake{
+      0%{ transform: translateY(-1px) rotate(0deg) scale(1.01); }
+      25%{ transform: translateY(-1px) rotate(-2deg) scale(1.01); }
+      50%{ transform: translateY(-1px) rotate(2deg) scale(1.01); }
+      75%{ transform: translateY(-1px) rotate(-1deg) scale(1.01); }
+      100%{ transform: translateY(-1px) rotate(0deg) scale(1.01); }
+    }
+
+    /* Opened */
+    .envelope.opened{
+      cursor:not-allowed;
+      background: linear-gradient(180deg, rgba(255,224,138,.18), rgba(0,0,0,.10));
+      border-color: rgba(255,224,138,.26);
+    }
+    .envelope.opened:hover{ transform:none; box-shadow: 0 14px 34px rgba(0,0,0,.22); }
+    .envelope.opened .icon{ display:none; }
+
+    .opened-badge{
+      display:none;
+      text-align:center;
+      padding: 8px 6px;
+      line-height: 1.1;
+    }
+    .envelope.opened .opened-badge{ display:block; }
+    .opened-badge b{
+      display:inline-block;
+      background: linear-gradient(135deg, rgba(255,224,138,.96), rgba(255,180,0,.92));
+      color:#3b1a00;
+      padding: 8px 10px;
+      border-radius: 12px;
+      box-shadow: 0 12px 26px rgba(0,0,0,.22);
+      font-weight: 1000;
+      letter-spacing: .2px;
+      font-size: 16px;
+    }
+    .opened-badge small{
+      display:block;
+      margin-top: 8px;
+      color: rgba(255,255,255,.78);
+      font-weight: 900;
+    }
+
+    .footer{
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    /* Modal */
+    .modal{
+      display:none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.64);
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 60;
+    }
+    .modal-content{
+      width: min(620px, 100%);
+      background: rgba(255,255,255,.96);
+      color: #1b1b1b;
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.45);
+      overflow: hidden;
+      transform-origin: 50% 60%;
+      animation: pop .16s ease-out;
+      position: relative;
+    }
+    @keyframes pop{
+      from { transform: translateY(12px) scale(.98); opacity: .6; }
+      to   { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    /* Decorative glow */
+    .modal-content::before{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background: radial-gradient(circle at 50% 40%, rgba(255,224,138,.28), transparent 50%),
+                  radial-gradient(circle at 20% 20%, rgba(255,255,255,.20), transparent 45%);
+      pointer-events:none;
+    }
+
+    .modal-head{
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(255,224,138,.34), rgba(255,180,0,.18));
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      display:flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .modal-head h3{
+      margin:0;
+      font-size: 16px;
+      letter-spacing: .2px;
+      font-weight: 1000;
+    }
+    .modal-body{
+      padding: 18px 16px 8px;
+      position: relative;
+      z-index: 1;
+    }
+    .modal-actions{
+      padding: 14px 16px 16px;
+      display:flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+    .btn-dark{
+      border: none;
+      background: #1f1f1f;
+      color: #fff;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 1000;
+    }
+    .btn-light{
+      border: 1px solid rgba(0,0,0,.14);
+      background: rgba(0,0,0,.04);
+      color: #111;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 1000;
+    }
+
+    /* Result center */
+    .result-wrap{
+      text-align:center;
+      padding: 10px 6px 2px;
+    }
+    .result-icon{
+      font-size: 48px;
+      filter: drop-shadow(0 18px 20px rgba(0,0,0,.20));
+      animation: floaty 1.6s ease-in-out infinite;
+    }
+    @keyframes floaty{
+      0%,100%{ transform: translateY(0); }
+      50%{ transform: translateY(-6px); }
+    }
+    .result-title{
+      margin: 10px 0 6px;
+      font-weight: 1000;
+      letter-spacing: .2px;
+      font-size: 18px;
+      color: #8b0000;
+    }
+    .result-amount{
+      display:inline-block;
+      margin: 4px 0 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255,224,138,.96), rgba(255,180,0,.92));
+      color: #3b1a00;
+      font-weight: 1100;
+      letter-spacing: .2px;
+      font-size: clamp(22px, 4.8vw, 32px);
+      box-shadow: 0 18px 40px rgba(0,0,0,.22);
+    }
+    .result-sub{
+      margin: 0;
+      color: rgba(0,0,0,.68);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    /* Settings (dynamic rows) */
+    .settings{
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .setting-row{
+      display:grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      background: rgba(0,0,0,.04);
+      border: 1px solid rgba(0,0,0,.06);
+      padding: 10px 12px;
+      border-radius: 12px;
+      align-items: end;
+    }
+    .field label{
+      display:block;
+      font-size: 12px;
+      color: rgba(0,0,0,.62);
+      margin-bottom: 6px;
+      font-weight: 1000;
+    }
+    input{
+      width: 100%;
+      padding: 10px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,.12);
+      outline: none;
+      font-weight: 950;
+      letter-spacing: .2px;
+    }
+    input:focus{
+      border-color: rgba(255,180,0,.65);
+      box-shadow: 0 0 0 3px rgba(255,180,0,.25);
+    }
+    .row-remove{
+      border: 1px solid rgba(0,0,0,.14);
+      background: rgba(0,0,0,.04);
+      color: #111;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 1000;
+      cursor:pointer;
+    }
+    .row-remove:hover{ transform: translateY(-1px); }
+    .settings-hint{
+      margin-top: 10px;
+      font-size: 13px;
+      color: rgba(0,0,0,.62);
+      font-weight: 800;
+    }
+    .settings-error{
+      display:none;
+      margin: 0 0 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(180,0,0,.18);
+      background: rgba(180,0,0,.06);
+      color: #7a0000;
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .settings-error.show{ display:block; }
+
+    /* Confetti */
+    .confetti-layer{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
+      z-index: 75;
+      overflow:hidden;
+    }
+    .confetti{
+      position:absolute;
+      width: 10px;
+      height: 14px;
+      border-radius: 3px;
+      opacity: .95;
+      transform: translate(-50%, -50%);
+      animation: confetti-fall 900ms ease-out forwards;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.25));
+    }
+    @keyframes confetti-fall{
+      0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(520deg); opacity: 0; }
+    }
+
+    @media (max-width: 560px){
+      .topbar{ flex-direction: column; align-items: stretch; }
+      .actions{ justify-content: stretch; }
+      .actions button{ width: 100%; }
+      .grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .envelope{ min-height: 96px; }
+      .setting-row{ grid-template-columns: 1fr 1fr; }
+      .row-remove{ grid-column: 1 / -1; }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      * { animation: none !important; transition: none !important; }
+    }
+  </style>
 </head>
 
 <body>
+  <div class="confetti-layer" id="confettiLayer"></div>
 
-<h1>🎉 MINI GAME LÌ XÌ MAY MẮN 🎉</h1>
-<button onclick="resetGame()">🔄 Chơi Lại</button>
+  <div class="app">
+    <div class="panel">
+      <div class="topbar">
+        <div class="titlewrap">
+          <h1>🎉 Mini Game Lì Xì Tết 2026 🧧</h1>
+          <p>Chạm để mở. Bao đã mở sẽ không mở lại.</p>
+        </div>
+        <div class="actions">
+          <button class="btn-gold" type="button" onclick="openSetting()">⚙️ Cài đặt</button>
+          <button class="btn-ghost" type="button" onclick="resetGame()">🔄 Reset</button>
+        </div>
+      </div>
 
-<div id="packetList"></div>
-<div id="popup" class="popup"></div>
+      <div class="content">
+        <div id="grid" class="grid" aria-label="Danh sách bao lì xì"></div>
+        <div class="footer">Tip: Nhấn <b>Esc</b> để đóng hộp thoại.</div>
+      </div>
+    </div>
+  </div>
 
-<script>
-let packets = [];
+  <!-- RESULT MODAL (center) -->
+  <div id="resultModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3 id="resultTitle">🎉 Chúc mừng!</h3>
+        <button class="btn-light" type="button" onclick="closeResult()">Đóng</button>
+      </div>
 
-function initPackets() {
-    packets = [];
-    for (let i = 0; i < 20; i++) packets.push(100000);
-    for (let i = 0; i < 10; i++) packets.push(200000);
-    for (let i = 0; i < 3; i++) packets.push(300000);
-    for (let i = 0; i < 2; i++) packets.push(500000);
-    packets.sort(() => Math.random() - 0.5);
-}
+      <div class="modal-body">
+        <div class="result-wrap">
+          <div class="result-icon">🧧</div>
+          <div class="result-title">Bạn trúng</div>
+          <div class="result-amount" id="resultAmount">0 VNĐ</div>
+          <p class="result-sub" id="resultSub">Chúc bạn một năm mới may mắn và bình an.</p>
+        </div>
+      </div>
 
-function renderPackets() {
-    const container = document.getElementById("packetList");
-    container.innerHTML = "";
+      <div class="modal-actions">
+        <button class="btn-dark" type="button" onclick="closeResult()">Tiếp tục</button>
+      </div>
+    </div>
+  </div>
 
-    packets.forEach((money, index) => {
-        const div = document.createElement("div");
-        div.className = "packet";
-        div.innerHTML = "🧧";
+  <!-- SETTING MODAL (dynamic rows) -->
+  <div id="settingModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="settingTitle">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3 id="settingTitle">⚙️ Cài đặt mệnh giá</h3>
+        <button class="btn-light" type="button" onclick="closeSetting()">Đóng</button>
+      </div>
 
-        div.onclick = function() {
-            openPacket(index, div);
-        };
+      <div class="modal-body">
+        <div id="settingError" class="settings-error"></div>
+        <div id="settingInputs" class="settings"></div>
+        <div class="settings-hint">
+          Bạn có thể <b>thêm/bớt</b> mệnh giá tùy ý. Mệnh giá hoặc số lượng = 0 sẽ không được tạo bao.
+        </div>
+      </div>
 
-        container.appendChild(div);
-    });
-}
+      <div class="modal-actions">
+        <button class="btn-light" type="button" onclick="addRow()">➕ Thêm mệnh giá</button>
+        <button class="btn-light" type="button" onclick="closeSetting()">Hủy</button>
+        <button class="btn-dark" type="button" onclick="applySetting()">Áp dụng & Reset</button>
+      </div>
+    </div>
+  </div>
 
-function openPacket(index, element) {
-    if (element.classList.contains("opened")) return;
+  <script>
+    // Dynamic config rows
+    let config = [
+      { amount: 100000, quantity: 20 },
+      { amount: 200000, quantity: 10 },
+      { amount: 300000, quantity: 3 },
+      { amount: 500000, quantity: 2 }
+    ];
 
-    element.classList.add("shake");
+    // Envelopes: { amount, opened }
+    let envelopes = [];
+    let isResultOpen = false;
 
-    setTimeout(() => {
-        element.classList.remove("shake");
-        element.classList.add("opened");
-        element.innerHTML = "💰";
+    function formatVND(n){
+      const safe = Number.isFinite(n) ? n : 0;
+      return safe.toLocaleString("vi-VN") + " VNĐ";
+    }
 
-        showPopup(packets[index]);
+    function shuffle(arr){
+      for(let i = arr.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
 
-        if (packets[index] >= 300000) {
-            launchConfetti();
+    function buildEnvelopes(){
+      const list = [];
+      for(const item of config){
+        const amt = Math.max(0, parseInt(item.amount || 0, 10));
+        const qty = Math.max(0, parseInt(item.quantity || 0, 10));
+        if(amt > 0 && qty > 0){
+          for(let i=0;i<qty;i++) list.push({ amount: amt, opened: false });
+        }
+      }
+      envelopes = shuffle(list);
+      renderGrid();
+    }
+
+    function renderGrid(){
+      const grid = document.getElementById("grid");
+      grid.innerHTML = "";
+
+      if(envelopes.length === 0){
+        const done = document.createElement("div");
+        done.style.gridColumn = "1 / -1";
+        done.style.padding = "14px 12px";
+        done.style.borderRadius = "14px";
+        done.style.border = "1px dashed rgba(255,255,255,.24)";
+        done.style.background = "rgba(0,0,0,.12)";
+        done.innerHTML =
+          "<b>Chưa có bao lì xì.</b>" +
+          "<div style='margin-top:6px;color:rgba(255,255,255,.75);font-size:13px;'>Vào Cài đặt để thêm mệnh giá/số lượng.</div>";
+        grid.appendChild(done);
+        return;
+      }
+
+      envelopes.forEach((env, index)=>{
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "envelope" + (env.opened ? " opened" : "");
+        btn.setAttribute("aria-label", env.opened ? "Bao đã mở" : "Mở bao lì xì");
+
+        btn.innerHTML = `
+          <span class="icon">🧧</span>
+          <div class="opened-badge">
+            <b>${formatVND(env.amount)}</b>
+            <small>Đã mở 🔒</small>
+          </div>
+        `;
+
+        if(env.opened || isResultOpen){
+          btn.disabled = true;
+        }else{
+          btn.onclick = ()=>openEnvelope(index, btn);
         }
 
-    }, 500);
-}
-
-function showPopup(amount) {
-    const popup = document.getElementById("popup");
-    popup.innerHTML = "🎉 Bạn trúng " + amount.toLocaleString() + " VNĐ 🎉";
-    popup.classList.add("show");
-
-    setTimeout(() => {
-        popup.classList.remove("show");
-    }, 2500);
-}
-
-function launchConfetti() {
-    for (let i = 0; i < 60; i++) {
-        let conf = document.createElement("div");
-        conf.className = "confetti";
-        conf.style.left = Math.random() * 100 + "vw";
-        conf.style.background = ["yellow","white","orange","gold"][Math.floor(Math.random()*4)];
-        conf.style.animationDuration = (2 + Math.random() * 2) + "s";
-        document.body.appendChild(conf);
-        setTimeout(() => conf.remove(), 4000);
+        grid.appendChild(btn);
+      });
     }
-}
 
-function resetGame() {
-    initPackets();
-    renderPackets();
-}
+    function openEnvelope(index, btnEl){
+      const env = envelopes[index];
+      if(!env || env.opened || isResultOpen) return;
 
-resetGame();
-</script>
+      btnEl.classList.add("opening");
+      btnEl.disabled = true;
 
+      setTimeout(()=>{
+        env.opened = true;
+
+        btnEl.classList.remove("opening");
+        btnEl.classList.add("opened");
+
+        showResult(env.amount, btnEl);
+        renderGrid();
+      }, 260);
+    }
+
+    function showResult(amount, sourceEl){
+      isResultOpen = true;
+
+      document.getElementById("resultAmount").innerText = formatVND(amount);
+
+      const remaining = envelopes.filter(e=>!e.opened).length;
+      document.getElementById("resultSub").innerText =
+        remaining > 0
+          ? `Còn lại ${remaining} bao chưa mở. Chúc bạn may mắn!`
+          : `Bạn đã mở hết tất cả bao. Chúc mừng năm mới!`;
+
+      openModal("resultModal");
+
+      const rect = sourceEl.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      burstConfetti(x, y, amount);
+
+      // extra confetti at modal center
+      setTimeout(()=>{
+        burstConfetti(window.innerWidth / 2, window.innerHeight / 2, amount, true);
+      }, 120);
+    }
+
+    function closeResult(){
+      closeModal("resultModal");
+      isResultOpen = false;
+      renderGrid();
+    }
+
+    function resetGame(){
+      closeResult();
+      closeSetting();
+      buildEnvelopes();
+
+      const grid = document.getElementById("grid");
+      grid.animate(
+        [{ transform:"scale(.99)", opacity:.85 }, { transform:"scale(1)", opacity:1 }],
+        { duration: 180, easing:"ease-out" }
+      );
+    }
+
+    function burstConfetti(x, y, amount, big = false){
+      const layer = document.getElementById("confettiLayer");
+      const maxAmt = config.reduce((m, r)=>Math.max(m, Number(r.amount)||0), 0);
+      const isBig = big || (maxAmt > 0 && amount >= maxAmt);
+
+      const count = isBig ? 40 : 24;
+      const colors = isBig
+        ? ["#ffb400","#ffe08a","#ffffff","#ff4d4d","#8b0000","#2dd4bf"]
+        : ["#ffb400","#ffe08a","#ffffff","#ff4d4d"];
+
+      for(let i=0;i<count;i++){
+        const p = document.createElement("div");
+        p.className = "confetti";
+        p.style.left = x + "px";
+        p.style.top = y + "px";
+
+        const dx = (Math.random()*2-1) * (isBig ? 240 : 170);
+        const dy = (Math.random()*-1) * (isBig ? 280 : 220) + (isBig ? 240 : 210);
+
+        p.style.setProperty("--dx", dx.toFixed(0) + "px");
+        p.style.setProperty("--dy", dy.toFixed(0) + "px");
+
+        p.style.background = colors[Math.floor(Math.random()*colors.length)];
+
+        const w = 8 + Math.random()*8;
+        const h = 10 + Math.random()*12;
+        p.style.width = w.toFixed(0) + "px";
+        p.style.height = h.toFixed(0) + "px";
+
+        layer.appendChild(p);
+        setTimeout(()=>p.remove(), 950);
+      }
+    }
+
+    // Modal helpers
+    function openModal(id){
+      const modal = document.getElementById(id);
+      modal.style.display = "flex";
+    }
+    function closeModal(id){
+      const modal = document.getElementById(id);
+      modal.style.display = "none";
+    }
+
+    // Settings UI (dynamic add/remove)
+    function openSetting(){
+      renderSettingRows();
+      setSettingError("");
+      openModal("settingModal");
+    }
+    function closeSetting(){
+      closeModal("settingModal");
+      setSettingError("");
+    }
+
+    function renderSettingRows(){
+      const container = document.getElementById("settingInputs");
+      container.innerHTML = "";
+
+      if(config.length === 0){
+        config.push({ amount: 100000, quantity: 10 });
+      }
+
+      config.forEach((item, index)=>{
+        const row = document.createElement("div");
+        row.className = "setting-row";
+        row.innerHTML = `
+          <div class="field">
+            <label for="amount${index}">Mệnh giá (VNĐ)</label>
+            <input id="amount${index}" type="number" min="0" step="1000" inputmode="numeric" value="${item.amount ?? 0}">
+          </div>
+          <div class="field">
+            <label for="qty${index}">Số lượng</label>
+            <input id="qty${index}" type="number" min="0" step="1" inputmode="numeric" value="${item.quantity ?? 0}">
+          </div>
+          <button class="row-remove" type="button" onclick="removeRow(${index})">🗑️ Xóa</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addRow(){
+      config.push({ amount: 100000, quantity: 1 });
+      renderSettingRows();
+    }
+
+    function removeRow(index){
+      if(config.length <= 1){
+        // keep at least 1 row for UX
+        config[0] = { amount: 100000, quantity: 10 };
+      }else{
+        config.splice(index, 1);
+      }
+      renderSettingRows();
+    }
+
+    function applySetting(){
+      // read rows
+      const next = [];
+      for(let i=0;i<config.length;i++){
+        const amt = parseInt(document.getElementById("amount"+i)?.value || "0", 10);
+        const qty = parseInt(document.getElementById("qty"+i)?.value || "0", 10);
+        next.push({
+          amount: Number.isFinite(amt) ? Math.max(0, amt) : 0,
+          quantity: Number.isFinite(qty) ? Math.max(0, qty) : 0
+        });
+      }
+
+      // validate: must have at least 1 valid envelope row
+      const hasAny = next.some(r => r.amount > 0 && r.quantity > 0);
+      if(!hasAny){
+        setSettingError("Cần ít nhất 1 mệnh giá có mệnh giá > 0 và số lượng > 0 để tạo bao lì xì.");
+        return;
+      }
+
+      config = next;
+      resetGame();
+      closeSetting();
+    }
+
+    function setSettingError(msg){
+      const el = document.getElementById("settingError");
+      if(!msg){
+        el.classList.remove("show");
+        el.textContent = "";
+        return;
+      }
+      el.textContent = msg;
+      el.classList.add("show");
+    }
+
+    // Overlay click to close
+    ["resultModal","settingModal"].forEach(id=>{
+      const modal = document.getElementById(id);
+      modal.addEventListener("click", (e)=>{
+        if(e.target === modal){
+          if(id === "resultModal") closeResult();
+          else closeSetting();
+        }
+      });
+    });
+
+    // ESC close
+    document.addEventListener("keydown", (e)=>{
+      if(e.key !== "Escape") return;
+      if(document.getElementById("resultModal").style.display === "flex") closeResult();
+      if(document.getElementById("settingModal").style.display === "flex") closeSetting();
+    });
+
+    buildEnvelopes();
+  </script>
 </body>
 </html>
